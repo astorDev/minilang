@@ -1,7 +1,9 @@
 using System.Text;
 
-public record MaybeHeadlessBlock(BlockHead? Head, Block[] Inner)
-{
+public record MaybeHeadlessBlock(BlockHead? Head, Block[] Inner, bool SpaceAfter = false)
+{ 
+    public string? Main = Head?.Main;
+
     public IEnumerable<string> HeadParts() {
         if (Head != null) {
             yield return Head.Main;
@@ -11,12 +13,33 @@ public record MaybeHeadlessBlock(BlockHead? Head, Block[] Inner)
             }
         }
     }
+
+    public MaybeHeadlessBlock AfterMain() => new MaybeHeadlessBlock(Head?.AfterMain(), Inner, SpaceAfter);
+
+    public bool TryBeHeaded(out Block block)
+    {
+        if (Head == null) {
+            block = null!;
+            return false;
+        }
+
+        block = new Block(Head, Inner);
+        return true;
+    }
+
+    public Block ToHeadedBlock()
+    {
+        if (Head == null) throw new InvalidOperationException($"the {nameof(MaybeHeadlessBlock)} is headless");
+        return new Block(Head, Inner);
+    }
 }
 
 public record PopMatcher(int index, string? pattern);
 
-public record Block(BlockHead Head, Block[] Inner)
+public record Block(BlockHead Head, Block[] Inner, bool SpaceAfter = false)
 {
+    public static implicit operator MaybeHeadlessBlock(Block block) => new(block.Head, block.Inner, block.SpaceAfter);
+
     public bool StartsWithLower => Head?.StartsWithLower ?? false;
     public bool StartsWithUpper => Head?.StartsWithUpper ?? false;
     public string Main = Head.Main;
@@ -28,9 +51,15 @@ public record Block(BlockHead Head, Block[] Inner)
         return true;
     }
 
-    public bool TryPopTwo(out Block resultBlock, out (string First, string Second) poped) {
-        var success = Head.TryPopTwo(out var popedHead, out poped);
+    public bool TryPopTwoAndRemainHeaded(out Block resultBlock, out (string First, string Second) poped) {
+        var success = Head.TryPopTwoAndNotExhaust(out var popedHead, out poped);
         resultBlock = success ? new Block(popedHead, Inner) : null!;
+        return success;
+    }
+
+    public bool TryPopTwo(out MaybeHeadlessBlock resultBlock, out (string First, string Second) poped) {
+        var success = Head.TryPopTwo(out var popedHead, out poped);
+        resultBlock = success ? new MaybeHeadlessBlock(popedHead, Inner, SpaceAfter) : null!;
         return success;
     }
 
@@ -43,11 +72,9 @@ public record Block(BlockHead Head, Block[] Inner)
 
     public static Block OfSingleElement(string element) => new(new BlockHead(element, Array.Empty<string>()), Array.Empty<Block>());
     
-    public static Block[] Read(string[] lines) {
-
-        var finalizedBlocks = new List<Block>();
-        var currentBlock = new List<string>();
-        var firstLine = lines.Where(l => !String.IsNullOrWhiteSpace(l)).PopFirst(out var remainingLines);
+    public static Block[] Read(string[] lines) 
+    {
+        var firstLine = lines.PopFirst(out var remainingLines);
         var blockWriter = new BlockWriter(BlockHead.Parse(firstLine));
         foreach (var line in remainingLines) blockWriter.Add(line);
 
@@ -59,7 +86,7 @@ public record Block(BlockHead Head, Block[] Inner)
     }
 
     public Block? After(string keyword) => Head?.After(keyword) is BlockHead head ? new Block(head, Inner) : null;
-    public MaybeHeadlessBlock AfterMain() => new MaybeHeadlessBlock(Head.AfterMain(), Inner);
+    public MaybeHeadlessBlock AfterMain() => new MaybeHeadlessBlock(Head.AfterMain(), Inner, SpaceAfter);
 
     public string ToString(string identation)
     {
@@ -67,8 +94,10 @@ public record Block(BlockHead Head, Block[] Inner)
         sb.AppendLine(Head?.ToString(identation));
         foreach (var block in Inner)
         {
-            sb.AppendLine(block.ToString(identation + Identation.One));
+            sb.Append(block.ToString(identation + Identation.One));
         }
+
+        if (SpaceAfter) sb.AppendLine();
         return sb.ToString();
     }
 
@@ -83,6 +112,7 @@ public class BlockWriter
     List<Block> blocks = new();
     BlockHead head;
     BlockWriter? sub;
+    bool spaceAfter = false;
 
     public BlockWriter(BlockHead head)
     {
@@ -91,6 +121,20 @@ public class BlockWriter
 
     public void Add(string line)
     {
+        if (String.IsNullOrWhiteSpace(line))
+        {
+            if (sub != null) 
+            { 
+                sub.Add(line);
+                return;
+            }
+            else 
+            {
+                spaceAfter = true;
+                return;
+            }
+        }
+
         if (!line.StartsWithSpace())
         {
             Rollup();
@@ -105,7 +149,14 @@ public class BlockWriter
     }
 
     private void Rollup() {
-        blocks.Add(new Block(head, sub?.Finish() ?? Array.Empty<Block>()));
+        var toAdd = new Block(
+            head, 
+            sub?.Finish() ?? Array.Empty<Block>(), 
+            spaceAfter
+        );
+
+        blocks.Add(toAdd);
+        spaceAfter = false;
     }
 
     public Block[] Finish() {

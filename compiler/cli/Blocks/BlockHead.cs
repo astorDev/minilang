@@ -18,13 +18,24 @@ public record BlockHead(string Main, string[] Extras)
         );
     }
 
-    public bool TryPopTwo(out BlockHead resultHead, out (string First, string Second) poped) {
+    public bool TryPopTwoAndNotExhaust(out BlockHead resultHead, out (string First, string Second) poped) {
         resultHead = null!;
         poped = ("", "");
         
         if (Extras.Length < 2) return false;
         poped = (Main, Extras[0]);
         resultHead = new BlockHead(Extras[1], Extras.Skip(2).ToArray());
+
+        return true;
+    }
+
+    public bool TryPopTwo(out BlockHead? remaining, out (string First, string Second) poped) {
+        remaining = null!;
+        poped = ("", "");
+        
+        if (Extras.Length < 1) return false;
+        poped = (Main, Extras[0]);
+        remaining = Extras.Length > 1 ? new BlockHead(Extras[1], Extras.Skip(2).ToArray()) : null;
 
         return true;
     }

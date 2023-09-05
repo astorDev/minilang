@@ -18,7 +18,7 @@ public record CsharpDialect(string? Namespace, CsharpProject? Project) : ICompil
 
     public const string Key = "csharp";
     public string TargetDir => "compiled";
-    public string MainFilename => "Program.cs";
+    public string MainFilename => "Program";
 
     public IEnumerable<string> ProjectFilenames
     {
@@ -32,8 +32,10 @@ public record CsharpDialect(string? Namespace, CsharpProject? Project) : ICompil
 
     public void AppendPreClass(StringBuilder code)
     {
-        code.AppendLine($"namespace {Namespace};");
-        code.AppendLine();
+        if (Namespace != null) { 
+            code.AppendLine($"namespace {Namespace};");
+            code.AppendLine();
+        }
     }
 
     public void AppendDataClass(StringBuilder code, ClassDeclaration declaration)
@@ -44,7 +46,7 @@ public record CsharpDialect(string? Namespace, CsharpProject? Project) : ICompil
             AppendDataClassProperty(code, declaration.Body.Properties[i], i == declaration.Body.Properties.Length - 1);
         }
 
-        code.AppendLine($"){Inheritors(declaration.Head.BaseClasses)};");
+        code.Append($"){Inheritors(declaration.Head.BaseClasses)};");
     }
 
     public static void AppendDataClassProperty(StringBuilder code, PropertyDeclaration property, bool isLast)
@@ -96,8 +98,8 @@ public record CsharpDialect(string? Namespace, CsharpProject? Project) : ICompil
     public string Name(FunctionCallPath path) {
         if (path.TryGetNameOnly(out var name)) return FunctionNamesMap[name];
         
-        (var steps, name) = path.SplitWithName();
-        var all = steps.Append(name.PascalCase());
+        var (first, other) = path.SplitWithFirst();
+        var all = new[] { first }.Union(other.Select(p => p.PascalCase()));
         return String.Join('.', all);
     }
 

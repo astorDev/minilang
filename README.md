@@ -1,2 +1,3 @@
-# minilang
-Minimalistic programming language
+# Minilang
+
+The minimalistic programming language.

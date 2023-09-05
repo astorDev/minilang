@@ -3,16 +3,20 @@ public record ReturningCall(
     FunctionCall? FunctionCall = null, 
     LocalVariableCall? LocalVariableCall = null,
     Lambda? Lambda = null,
-    Block? Unparsed = null)
+    MaybeHeadlessBlock? Unparsed = null)
 {
-    public static ReturningCall Parse(Block body, FunctionContext context)
+    public static ReturningCall Parse(MaybeHeadlessBlock block, FunctionContext context)
     {
-        if (Lambda.TryParse(body, out var lambda)) return lambda;
-        if (StringLiteral.TryParse(body, out var stringLiteral)) return stringLiteral;
-        if (LocalVariableCall.TryParse(body, context, out var localVariableCall)) return localVariableCall;
-        if (FunctionCall.TryParse(body, context, out var functionCall)) return functionCall;
+        if (block.TryBeHeaded(out var headed))
+        {
+            if (Lambda.TryParse(headed, out var lambda)) return lambda;
+            if (StringLiteral.TryParse(headed, out var stringLiteral)) return stringLiteral;
+            if (LocalVariableCall.TryParse(headed, context, out var localVariableCall)) return localVariableCall;
+        }
 
-        return new ReturningCall(body);
+        if (FunctionCall.TryParse(block, context, out var functionCall)) return functionCall;
+
+        return new ReturningCall(Unparsed: block);
     }
 
     public static implicit operator ReturningCall(Lambda lambda) => new ReturningCall(Lambda: lambda);

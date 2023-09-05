@@ -27,6 +27,6 @@ compiler.Printed();
 
 compiler.PrepareTargetFolder();
 compiler.CompileProjectFiles();
-compiler.Compile(classDeclarations);
 var mainFunction = functionDeclarations.SingleOrDefault(d => d.Signature.Name == "go") ?? throw new Exception("unable to find go function");
 compiler.Compile(mainFunction);
+compiler.Compile(classDeclarations);

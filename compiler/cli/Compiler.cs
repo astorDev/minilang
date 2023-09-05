@@ -43,7 +43,7 @@ public record Compiler(ICompilerDialect Dialect, string TargetDir)
 
     public void Compile(ClassDeclaration[] declarations)
     {
-        foreach (var fileDeclarations in declarations.GroupBy(d => d.Filename))
+        foreach (var fileDeclarations in declarations.GroupBy(d => d.Filename == "" ? Dialect.MainFilename : d.Filename))
         {
             var code = new StringBuilder();
 
@@ -67,11 +67,12 @@ public record Compiler(ICompilerDialect Dialect, string TargetDir)
                 localVariableCall => Dialect.Append(code, localVariableCall)
             );
             
+            if (statement.SpaceAfter) code.AppendLine();
             code.AppendLine();
         }
         Dialect.AppendMainEnd(code);
 
-        Save(code, Dialect.MainFilename);
+        Save(code, Dialect.Filename(Dialect.MainFilename));
     }
 
     public void AppendToFile(StringBuilder code, IEnumerable<ClassDeclaration> classes)
@@ -83,8 +84,6 @@ public record Compiler(ICompilerDialect Dialect, string TargetDir)
             } else {
                 Dialect.AppendRegularClass(code, declaration);
             }
-
-            code.AppendLine();
         }
     }
 

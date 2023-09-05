@@ -4,6 +4,13 @@ public record Statement(
     LocalVariableCall? LocalVariableCall = null
 )
 {
+    public bool SpaceAfter => 
+        (bool?)FunctionCall?.SpaceAfter ??
+        (bool?)Assignment?.SpaceAfter ??
+        (bool?)LocalVariableCall?.SpaceAfter ??
+        throw new Exception("Unknown statement");
+
+
     public FunctionCall AsFunctionCall => FunctionCall ?? throw new Exception($"Statement is not function call, but {Concrete.GetType()}");
     public Assignment AsAssignment => Assignment ?? throw new Exception($"The statement is not assignment, but {Concrete.GetType()}");
     public LocalVariableCall AsLocalVariableCall => LocalVariableCall ?? throw new Exception($"The statement is not local variable call, but {Concrete.GetType()}");

@@ -23,8 +23,8 @@ compile
 go
     builder = webAppBuilder @args
 
-    builder.services.addEndpointsApiExplorer
-    builder.services.addSwaggerGen
+    builder.services.AddEndpointsApiExplorer
+    builder.services.AddSwaggerGen
     
     builder.logging.clearProviders
     builder.logging.addStateJsonConsole

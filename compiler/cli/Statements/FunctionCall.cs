@@ -1,11 +1,12 @@
 global using ArgumentAssignments = System.Collections.Generic.Dictionary<string, ReturningCall>;
 
-public record FunctionCall(FunctionCallPath Path, ArgumentAssignments Arguments)
+public record FunctionCall(FunctionCallPath Path, ArgumentAssignments Arguments, bool SpaceAfter)
 {
-    public static bool TryParse(Block block, FunctionContext context, out FunctionCall functionCall) {
+    public static bool TryParse(MaybeHeadlessBlock block, FunctionContext context, out FunctionCall functionCall) {
         functionCall = new FunctionCall(
-            FunctionCallPath.Parse(block.Main!),
-            ArgumentAssingmentParser.Parse(block.AfterMain(), context)
+            FunctionCallPath.Parse(block.Main),
+            ArgumentAssingmentParser.Parse(block.AfterMain(), context),
+            block.SpaceAfter
         );
 
         return true;
@@ -17,13 +18,14 @@ public record FunctionCall(FunctionCallPath Path, ArgumentAssignments Arguments)
             ? $"with arguments: {Environment.NewLine}{String.Join(Environment.NewLine, Arguments.Select(argument => $"{argument.Key} = {argument.Value}"))}"
             : "without arguments";
 
-        return $"FunctionCall '{Path}' {argumentsString}";
+        return $"FunctionCall '{Path}' {argumentsString}" + (SpaceAfter ? "with space after" : "");
     }
 }
 
-public record FunctionCallPath(string[] Parts)
+public record FunctionCallPath(params string[] Parts)
 {
-    public static FunctionCallPath Parse(string text) {
+    public static FunctionCallPath Parse(string? text) {
+        if (text == null) return new FunctionCallPath("autoconstructor");
         return new FunctionCallPath(text.Split('.'));
     }
 
@@ -41,6 +43,12 @@ public record FunctionCallPath(string[] Parts)
         return (prepath, name);
     }
 
+    public (string First, string[] Remaining) SplitWithFirst() {
+        var first = Parts.First();
+        var remaining = Parts.Skip(1).ToArray();
+        return (first, remaining);
+    }
+
     public string Name => Parts.Single();
 
     public override string ToString()
@@ -54,8 +62,18 @@ public record ArgumentAssingmentParser
     public static ArgumentAssignments Parse(MaybeHeadlessBlock block, FunctionContext context)
     {
         var headParts = block.HeadParts();
-        var fromHead = headParts.Select(p => p.SplitInTwoLeftOptional(':')).Select(p => new { Name = p.Left, Block = Block.OfSingleElement(p.Right) });
-        var fromInner = block.Inner.Select(b => new { Name = (String?)null, Block = b });
+        var fromHead = headParts.Select(p => p.SplitInTwoLeftOptional(':')).Select(p => new Raw(Block.OfSingleElement(p.Right), p.Left));
+        var fromInner = block.Inner.Select(b => { 
+            if (!b.TryPopTwo(out var remaining, out var poped)){
+                return new Raw(b);
+            }
+
+            if (poped.Second != "=") {
+                return new Raw(b);
+            }
+
+            return new Raw(remaining, poped.First); 
+        });
 
         var all = fromHead.Union(fromInner).ToArray();
 
@@ -68,6 +86,8 @@ public record ArgumentAssingmentParser
 
         return result;
     }
+
+    record Raw(MaybeHeadlessBlock Block, string? Name = null);
 }
 
 public record PositionalArgument
