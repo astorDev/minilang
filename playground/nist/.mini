@@ -1,0 +1,59 @@
+compile
+    csharp
+        web 'Template
+        packages =
+            'System.Net.Http.Json:7.0.0'
+            'Swashbuckle.AspNetCore:5.6.3
+            'Nist.Logs:2.0.1
+            'Nist.Errors:2.0.1
+            'Nist.Responses:1.0.0
+            'Astor.Logging:2.1.0
+        usings =
+            'Template
+            'System.Net
+            'System.Net.Http.Json
+            'System.Reflection
+            'Microsoft.AspNetCore.Mvc
+            'Nist.Errors
+            'Nist.Logs
+            'Nist.Responses
+            'Nist.Errors
+            'Astor.Logging
+
+go
+    builder = webAppBuilder @args
+
+    builder.services.AddEndpointsApiExplorer
+    builder.services.AddSwaggerGen
+
+    builder.configuration.'Logging:LogLevel:Default = 'Warning
+    builder.configuration.'Logging:LogLevel:Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware = 'None
+    builder.configuration.'Logging:LogLevel:Microsoft.Hosting.Lifetime = 'Informaton
+    builder.configuration.'Logging:StateJsonConsole:LogLevel:Default = 'None
+    builder.configuration.'Logging:StateJsonConsole:LogLevel:Nist.Logs = 'Information
+    
+    builder.logging.clearProviders
+    builder.logging.addSimpleConsole => @c.signgleLine = true
+    builder.logging.addStateJsonConsole
+
+    app = builder.build
+    
+    app.useSwagger
+    app.useSwaggerUI
+    
+    app.useHttpIOLogging
+    
+    app.useErrorBody => on @ex
+        default = ERRORS_UNKNOWN
+    
+    app.mapGet '/'URIS_ABOUT => about
+        description = `Template
+        version = getAssemblyVersion
+        environment = @IHostEnvironment.environmentName
+    
+    app.run
+
+About data
+    String description
+    String version
+    String environment

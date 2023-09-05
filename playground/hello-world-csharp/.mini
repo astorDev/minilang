@@ -1,0 +1,8 @@
+compile
+    csharp
+        console 'Minilang.Hello
+
+go
+    print 'What's_your_name?
+    name = read
+    print 'Nice_to_meet_you,_{0}._I'm_minilang_code! name

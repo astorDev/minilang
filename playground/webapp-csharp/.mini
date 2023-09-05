@@ -1,0 +1,14 @@
+compile
+    csharp
+        web 'Minilang.HelloWeb
+
+go
+    builder = webAppBuilder @args
+
+    app = builder.build
+
+    app.mapGet
+        '/
+        => 'Hello_Minilang_WebApi!
+    
+    app.run

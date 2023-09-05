@@ -1,0 +1,2 @@
+compileToCsharp
+    namespace="Venomex.MiddleOffice.Payments.Repository"
