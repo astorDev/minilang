@@ -1,0 +1,7 @@
+set csproj:Hello.You
+    console
+
+go csprog
+    print 'What_is_your_name?
+    name = read
+    print 'Hello,_'name'_I_am_minilang!

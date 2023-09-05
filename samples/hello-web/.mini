@@ -1,0 +1,11 @@
+set csproj:Hello.Web
+    web
+
+go csprog
+    builder = webAppBuilder @args
+    app = builder.build
+
+    app.mapGet '/ 
+        => 'Hello_Web
+
+    app.run

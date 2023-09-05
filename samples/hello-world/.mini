@@ -1,0 +1,5 @@
+proj csproj:HelloWorld.Minilang
+    console
+
+program csprog
+    print 'Hello_World!

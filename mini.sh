@@ -1,1 +1,1 @@
-cd compiler/cli && dotnet run ../../playground/$1 --silent && cd ../../playground/$1/compiled && dotnet run
+cd cli && dotnet run ../samples/$1 --silent && cd ../samples/$1/compiled && dotnet run
