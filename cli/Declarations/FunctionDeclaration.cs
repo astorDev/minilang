@@ -1,5 +1,13 @@
 public record FunctionDeclaration(FunctionSignature Signature, Statement[] Statements, string Filename) : IDeclaration
 {
+    public bool TryGetSingleStatement(out Statement statement)
+    {
+        statement = null!;
+        if (Statements.Length != 1) return false;
+        statement = Statements.Single();
+        return true;
+    }
+
     public Statement SingleStatement => Statements.Length == 1 ? Statements.Single() : throw new($"{this} has more then one statement");
     
     public static bool TryParse(FileBlock declaration, out FunctionDeclaration functionDeclaration)

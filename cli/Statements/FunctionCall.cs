@@ -6,6 +6,19 @@ public static class ArgumentAssignmentExtensions
     {
         return assignments.Count == 1 ? assignments.Single().Value : throw new($"{assignments} has more then one element");
     }
+
+    public static IEnumerable<string> LiteralsOfOptionalArgument(this ArgumentAssignments assignments, string argumentName)
+    {
+        if (!assignments.TryGetValue(argumentName, out var assignment))
+            return Array.Empty<string>();
+
+        if (!assignment.TryBeFunctionCall(out var functionCall)) throw new Exception($"{assignment} is not FunctionCall");
+
+        return functionCall
+            .Arguments
+            .Values.Select(a => a.RequiredStringLiteral.OnlyString)
+            .ToArray();
+    }
 }
 
 

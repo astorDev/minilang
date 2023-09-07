@@ -7,9 +7,7 @@ host csproj:host/Template.Host
         references =
             '..\protocol\Template.Protocol
         usings =
-            'Template
             'Microsoft.AspNetCore.Mvc
-            'Nist.Errors
             'System.Net
             'Nist.Logs
             'Astor.Logging
@@ -29,7 +27,7 @@ go csprog:host
 
     builder.logging.clearProviders
     builder.logging.addSimpleConsole
-        => @c.singleConsole = TRUE
+        => @c.singleLine = TRUE
     builder.logging.addStateJsonConsole
 
     app = builder.build
@@ -38,8 +36,17 @@ go csprog:host
     app.useSwaggerUI
     
     app.useHttpIOLogging
+
+    app.MapGet '/about
+        => about
+            description = 'Template_Host
+            version = 'v1
+            environment = @IHostEnvironment.env.environmentName
     
     app.run
+
+protocol csproj:protocol/Template.Protocol
+    lib
 
 About data csfile:protocol/About
     String description

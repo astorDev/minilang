@@ -19,8 +19,8 @@ public record CsharpProject(string Type,
 
         return new(
             call.Path.Name,
-            Packages: Extract.LiteralsOfCallArgument(assignments, "packages").Select(Package.Parse).ToArray(),
-            Usings: Extract.LiteralsOfCallArgument(assignments, "usings").ToArray(),
+            Packages: Extract.LiteralsOfOptionalArgument(assignments, "packages").Select(Package.Parse).ToArray(),
+            Usings: Extract.LiteralsOfOptionalArgument(assignments, "usings").ToArray(),
             ProjectName : call.Arguments.GetValueOrDefault(PositionalArgument.Zero)?.RequiredStringLiteral.OnlyString
         );
     }
@@ -88,36 +88,5 @@ public record CsharpProject(string Type,
         }
 
         code.AppendLine("  </ItemGroup>");
-    }
-}
-
-public record Package(string Name, string Version)
-{
-    public static Package Parse(string text)
-    {
-        var parts = text.Split(':');
-        return new Package(parts[0], parts[1]);
-    }
-
-    public static Package[] Parse(ArgumentAssignments assignments)
-    {
-        return Extract.LiteralsOfCallArgument(assignments, "packages")
-            .Select(Parse)
-            .ToArray();
-    }
-}
-
-public class Extract
-{
-    public static IEnumerable<string> LiteralsOfCallArgument(ArgumentAssignments assignments, string argumentName)
-    {
-        if (!assignments.TryGetValue(argumentName, out var assignment))
-            return Array.Empty<string>();
-
-        return assignment
-            .AsFunctionCall
-            .Arguments
-            .Values.Select(a => a.RequiredStringLiteral.OnlyString)
-            .ToArray();
     }
 }

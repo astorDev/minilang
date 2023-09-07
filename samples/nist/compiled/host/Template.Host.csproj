@@ -4,4 +4,22 @@
      <ImplicitUsings>enable</ImplicitUsings>
      <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Nist.Logs" Version="2.0.1" />
+    <PackageReference Include="Astor.Logging" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.AspNetCore.Mvc" />
+    <Using Include="System.Net" />
+    <Using Include="Nist.Logs" />
+    <Using Include="Astor.Logging" />
+    <Using Include="System.Reflection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\protocol\Template.Protocol.csproj" />
+  </ItemGroup>
 </Project>

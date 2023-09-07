@@ -1,4 +1,4 @@
-public class CsfileDialect : IDialect
+public record CsfileDialect(GlobalContext Context) : IDialect
 {
     public static readonly Dictionary<string, string> FunctionNamesMap = new()
     {
@@ -24,7 +24,7 @@ public class CsfileDialect : IDialect
         );
     }
 
-    public static void Append(CodeBuilder code, Statement statement, bool inLambda = false)
+    public void Append(CodeBuilder code, Statement statement, bool inLambda = false)
     {
         statement.On(
             functionCall => Append(code, functionCall, skipSemicolon: inLambda),
@@ -36,7 +36,7 @@ public class CsfileDialect : IDialect
         if (!inLambda) code.AppendLine();
     }
 
-    public static void Append(CodeBuilder code, Assignment assignment, bool skipSemicolon = false)
+    public void Append(CodeBuilder code, Assignment assignment, bool skipSemicolon = false)
     {
         Append(code, assignment.Target);
         code.Append(" = ");
@@ -44,7 +44,7 @@ public class CsfileDialect : IDialect
         if (!skipSemicolon) code.Append(";");
     }
 
-    public static void Append(CodeBuilder code, Assignee assignee)
+    public void Append(CodeBuilder code, Assignee assignee)
     {
         assignee.On(
             argument: x => Append(code, x),
@@ -52,20 +52,20 @@ public class CsfileDialect : IDialect
         );
     }
 
-    public static void Append(CodeBuilder code, ArgumentCall argumentCall)
+    public void Append(CodeBuilder code, ArgumentCall argumentCall)
     {
         code.Append(argumentCall.Signature.Name);
         Append(code, argumentCall.Chain);
     }
 
-    public static void Append(CodeBuilder code, VariableCall variableCall)
+    public void Append(CodeBuilder code, VariableCall variableCall)
     {
         if (variableCall.IsNew) code.Append("var ");
         code.Append(variableCall.Variable.Name);
         Append(code, variableCall.Chain);
     }
 
-    public static void Append(CodeBuilder code, CallContinuationPart[] assigneeChain)
+    public void Append(CodeBuilder code, CallContinuationPart[] assigneeChain)
     {
         foreach (var part in assigneeChain)
         {
@@ -73,7 +73,7 @@ public class CsfileDialect : IDialect
         }
     }
 
-    public static void Append(CodeBuilder code, CallContinuationPart part)
+    public void Append(CodeBuilder code, CallContinuationPart part)
     {
         part.On(
             propertyCall: x => code.Append($".{x.PropertyName.PascalCase()}"),
@@ -86,7 +86,7 @@ public class CsfileDialect : IDialect
         );
     }
 
-    public static void Append(CodeBuilder code, FunctionCall call, bool skipSemicolon = false)
+    public void Append(CodeBuilder code, FunctionCall call, bool skipSemicolon = false)
     {
         var csharpFunctionName = Name(call.Path);
         code.Append($"{csharpFunctionName}(");
@@ -99,7 +99,7 @@ public class CsfileDialect : IDialect
         if (!skipSemicolon) code.Append(";");
     }
 
-    public static string Name(FunctionCallPath path) 
+    public string Name(FunctionCallPath path) 
     {
         if (path.TryGetNameOnly(out var name)) {
             return ResolveGlobalFunctionName(name);
@@ -110,14 +110,15 @@ public class CsfileDialect : IDialect
         return String.Join('.', all);
     }
 
-    public static string ResolveGlobalFunctionName(string name) 
+    public string ResolveGlobalFunctionName(string name) 
     {
+        if (Context.TryUseAsConstructor(name, out var @class)) return "new " + @class.Head.Me.Name;
         if (FunctionNamesMap.TryGetValue(name, out var globalFunctionName)) return globalFunctionName;
 
         return name;
     }
 
-    public static void Append(CodeBuilder code, ReturningCall returningCall)
+    public void Append(CodeBuilder code, ReturningCall returningCall)
     {
         returningCall.On
             (
@@ -130,14 +131,26 @@ public class CsfileDialect : IDialect
             );
     }
 
-    public static void Append(CodeBuilder code, Lambda lambda)
+    public void Append(CodeBuilder code, Lambda lambda)
     {
-        var argsString = lambda.Context.Arguments.Any() ? String.Join(", ", lambda.Context.Arguments.Select(x => x.Name)) : "";
+        var argsString = lambda.Context.Arguments.Any() ? String.Join(", ", lambda.Context.Arguments.Select(ArgumentString)) : "";
         code.Append($"({argsString}) => ");
         Append(code, lambda.Statement, inLambda: true);
     }
 
-    public static void Append(CodeBuilder code, StringLiteral literal) 
+    public string ArgumentString(ArgumentSignature signature)
+    {
+        var code = new CodeBuilder();
+        if (signature.Type != null) {
+            code.Append(ClassSignature(signature.Type));
+            code.Append(" ");
+        }
+
+        code.Append(signature.Name);
+        return code.Build();
+    }
+
+    public void Append(CodeBuilder code, StringLiteral literal) 
     {
         if (literal.IsInterpolated) code.Append("$");
         code.Append("\"");
@@ -161,12 +174,12 @@ public class CsfileDialect : IDialect
         _csharp.AppendDataClass(code, declaration);
     }
 
-    public static void Append(CodeBuilder code, LocalVariableCall localVariableCall)
+    public void Append(CodeBuilder code, LocalVariableCall localVariableCall)
     {
         code.Append(localVariableCall.Variable.Name);
     }
 
-    public static void AppendDataClass(CodeBuilder code, ClassDeclaration declaration)
+    public void AppendDataClass(CodeBuilder code, ClassDeclaration declaration)
     {
         code.AppendLine($"public record {ClassSignature(declaration.Head.Me)}(");
         for (var i = 0; i < declaration.Body.Properties.Length; i++)
@@ -177,17 +190,17 @@ public class CsfileDialect : IDialect
         code.Append($"){Inheritors(declaration.Head.BaseClasses)};");
     }
 
-    public static void AppendDataClassProperty(CodeBuilder code, PropertyDeclaration property, bool isLast)
+    public void AppendDataClassProperty(CodeBuilder code, PropertyDeclaration property, bool isLast)
     {
         var trailing = isLast ? "" : ",";
         code.AppendLine($"{Identation.One}{property.Type} {property.Name}{trailing}");
     }
 
-    public static string ClassSignature(ClassSignature signature) {
+    public string ClassSignature(ClassSignature signature) {
         var genericArgumentStrings = signature.GenericArguments.Any() ? signature.GenericArguments.Select(ClassSignature) : Array.Empty<string>();
 
         return signature.GenericArguments.Any() ? $"{signature.Name}<{String.Join(", ", genericArgumentStrings)}>" : signature.Name;
     }
 
-     public static string Inheritors(ClassSignature[] signatures) => signatures.Any() ? " : " + String.Join(", ", signatures.Select(ClassSignature)) : "";
+     public string Inheritors(ClassSignature[] signatures) => signatures.Any() ? " : " + String.Join(", ", signatures.Select(ClassSignature)) : "";
 }

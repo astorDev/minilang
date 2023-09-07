@@ -27,6 +27,7 @@ public static class StringExtensions
     }
 
     public static string PascalCase(this string s) => s[0].ToString().ToUpper() + s[1..];
+    public static string CamelCase(this string s) => s[0].ToString().ToLower() + s[1..];
 }
 
 public static class Identation

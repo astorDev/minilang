@@ -63,6 +63,14 @@ public record ReturningCall(
         if (ArgumentCall != null) argumentCall(ArgumentCall);
     }
 
+    public bool TryBeFunctionCall(out FunctionCall functionCall)
+    {
+        functionCall = null!;
+        if (FunctionCall == null) return false;
+        functionCall = FunctionCall;
+        return true;
+    }
+
     public StringLiteral RequiredStringLiteral => StringLiteral ?? throw new Exception($"Returning call is not StringLiteral, but '{TheOne.GetType()}'");
     public FunctionCall AsFunctionCall => FunctionCall ?? throw new Exception($"Returning call is not {nameof(FunctionCall)}, but '{TheOne.GetType()}'");
     public LocalVariableCall AsLocalVariableCall => LocalVariableCall ?? throw new Exception($"Returning call is not {nameof(LocalVariableCall)}, but '{TheOne.GetType()}'");

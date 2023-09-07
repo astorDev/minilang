@@ -10,7 +10,7 @@ builder.Configuration["Logging:StateJsonConsole:LogLevel:Default"] = "None";
 builder.Configuration["Logging:StateJsonConsole:LogLevel:Nist.Logs"] = "Information";
 
 builder.Logging.ClearProviders();
-builder.Logging.AddSimpleConsole((c) => c.SingleConsole = true);
+builder.Logging.AddSimpleConsole((c) => c.SingleLine = true);
 builder.Logging.AddStateJsonConsole();
 
 var app = builder.Build();;
@@ -20,4 +20,6 @@ app.UseSwaggerUI();
 
 app.UseHttpIOLogging();
 
+app.MapGet("/about", (IHostEnvironment env) => new About("Template Host", "v1", env.EnvironmentName));
 app.Run();
+

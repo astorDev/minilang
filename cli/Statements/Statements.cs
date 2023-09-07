@@ -10,6 +10,13 @@ public record Statement(
         (bool?)LocalVariableCall?.SpaceAfter ??
         throw new Exception("Unknown statement");
 
+    public bool TryGetFunctionCall(out FunctionCall functionCall)
+    {
+        functionCall = null!;
+        if (FunctionCall == null) return false;
+        functionCall = FunctionCall;
+        return true;
+    }
 
     public FunctionCall RequiredFunctionCall => FunctionCall ?? throw new Exception($"Statement is not function call, but {Concrete.GetType()}");
     public Assignment AsAssignment => Assignment ?? throw new Exception($"The statement is not assignment, but {Concrete.GetType()}");
