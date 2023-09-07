@@ -56,6 +56,8 @@ public record ClassDeclarationHead(ClassSignature Me, ClassSignature[] BaseClass
 
 public record ClassSignature(string Name, ClassSignature[] GenericArguments)
 {
+    public static ClassSignature OfOnlyName(string name) => new(name, Array.Empty<ClassSignature>());
+
     public static bool TryParse(string raw, out ClassSignature signature) 
     {
         signature = null!;
@@ -63,7 +65,7 @@ public record ClassSignature(string Name, ClassSignature[] GenericArguments)
         signature = Parse(raw);
         return true;
     }
-
+    
     private static ClassSignature Parse(string raw, char splitSymbol = '_')
     {
         string[] split = raw.Split(splitSymbol);

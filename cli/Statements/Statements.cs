@@ -16,13 +16,13 @@ public record Statement(
     public LocalVariableCall AsLocalVariableCall => LocalVariableCall ?? throw new Exception($"The statement is not local variable call, but {Concrete.GetType()}");
 
     public static implicit operator Statement(FunctionCall functionCall) => new Statement(FunctionCall: functionCall);
-    public static implicit operator Statement(Assignment assignment) => new Statement(Assignment: assignment);
+    //public static implicit operator Statement(Assignment assignment) => new Statement(Assignment: assignment);
     public static implicit operator Statement(LocalVariableCall localVariableCall) => new Statement(LocalVariableCall: localVariableCall);
 
     public static Statement Parse(Block block, FunctionContext context)
     {
+        if (Assignment.TryParse(block, context, out var assignment)) return new Statement(Assignment: assignment);
         if (LocalVariableCall.TryParse(block, context, out var localVariableCall)) return localVariableCall;
-        if (Assignment.TryParse(block, context, out var assignment)) return assignment;
         if (FunctionCall.TryParse(block, context, out var function)) return function;
         
         throw new Exception($"Unable to parse statement block {block}");

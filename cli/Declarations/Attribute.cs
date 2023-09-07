@@ -1,4 +1,4 @@
-global using Attributes = System.Collections.Generic.Dictionary<string, string>;
+global using Attributes = System.Collections.Generic.Dictionary<string, string?>;
 global using Attribute = System.Collections.Generic.KeyValuePair<string, string?>;
 
 

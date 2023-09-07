@@ -1,4 +1,4 @@
-public record Lambda(ReturningCall ReturningCall, FunctionContext LambdaContext)
+public record Lambda(Statement Statement, FunctionContext Context)
 {
     public static bool TryParse(Block block, out Lambda lambda) 
     {
@@ -6,8 +6,14 @@ public record Lambda(ReturningCall ReturningCall, FunctionContext LambdaContext)
         if (!block.TryPopMain("=>", out var lambdaBodyBlock)) return false;
 
         var context = new FunctionContext();
-        lambda = new Lambda(ReturningCall.Parse(lambdaBodyBlock, context), context);
+        var statement = Statement.Parse(lambdaBodyBlock, context);
+        lambda = new Lambda(statement, context);
 
         return true;
+    }
+
+    public override string ToString()
+    {
+        return $"Lambda {Context} = {Statement}";
     }
 }

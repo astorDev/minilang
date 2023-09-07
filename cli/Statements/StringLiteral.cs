@@ -5,6 +5,8 @@ public record InterpolatedStringPart(
     String? RawString = null
 )
 {
+    public bool IsReturningCall => ReturningCall is not null;
+
     public static implicit operator InterpolatedStringPart(ReturningCall returningCall) => new InterpolatedStringPart(ReturningCall: returningCall);
     public static implicit operator InterpolatedStringPart(string rawString) => new InterpolatedStringPart(RawString: rawString);
 
@@ -18,11 +20,24 @@ public record InterpolatedStringPart(
         if (ReturningCall is not null) returningCall(ReturningCall);
         if (RawString is not null) rawString(RawString);
     }
+
+    public override string ToString()
+    {
+        if (RawString != null) return $"\"{RawString}\"";
+
+        return ReturningCall!.ToString();
+    }
 }
 
 public record StringLiteral(InterpolatedStringPart[] Parts) : IEnumerable<InterpolatedStringPart>
 {
-    public bool IsInterpolated => Parts.Length > 1;
+    public static Dictionary<string, string> Escapes = new Dictionary<string, string>() 
+    {
+        { "dot", "." },
+        { "quote", "," }
+    };
+
+    public bool IsInterpolated => Parts.Any(p => p.IsReturningCall);
     public string OnlyString => IsInterpolated ? throw new Exception("StringLiteral is not only string") : Parts[0].RequiredString;
 
     public static bool TryParse(Block block, FunctionContext context, out StringLiteral stringLiteral) {
@@ -36,15 +51,22 @@ public record StringLiteral(InterpolatedStringPart[] Parts) : IEnumerable<Interp
 
         for (int i = 0; i < parts.Length; i++)
         {
+            var part = parts[i];
             var isEven = i % 2 == 0;
             if (isEven)
             {
-                resultParts.Add(parts[i]);
+                resultParts.Add(part);
                 continue;
             }
             else
             {
-                var interpolatedBlock = Block.OfSingleElement(parts[i]);
+                if (Escapes.TryGetValue(part, out var escape))
+                {
+                    resultParts.Add(escape);
+                    continue;
+                }
+
+                var interpolatedBlock = Block.OfSingleElement(part);
                 resultParts.Add(ReturningCall.Parse(interpolatedBlock, context));
             }
         }
@@ -61,5 +83,11 @@ public record StringLiteral(InterpolatedStringPart[] Parts) : IEnumerable<Interp
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    public override string ToString()
+    {
+        var partsString = string.Join<InterpolatedStringPart>("+", Parts);
+        return IsInterpolated ? $"Interpolated string {partsString}" : $"Raw String \"{OnlyString}\"";
     }
 }

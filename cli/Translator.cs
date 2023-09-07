@@ -16,6 +16,7 @@ public record Translator(string TargetDir, Dictionary<string, IDialect> Dialects
     {
         foreach (var x in declarations.GroupBy(DialectAndFilename))
         {
+            Print.Line($"Writing {x.Key.Filename} with {x.Key.Dialect}");
             var code = new CodeBuilder();
             foreach (var declaration in x) x.Key.Dialect.Write(code, declaration);
             Save(code, x.Key.Filename);
@@ -37,6 +38,11 @@ public record Translator(string TargetDir, Dictionary<string, IDialect> Dialects
     
     void Save(CodeBuilder code, string filename)
     {
-        File.AppendAllText(Path.Combine(TargetDir, filename), code.Build());
+        var fullPath = Path.Combine(TargetDir, filename);
+        var directory = Path.GetDirectoryName(fullPath)!;
+        Directory.CreateDirectory(directory);
+
+        File.AppendAllText(fullPath, code.Build());
+        Print.Line($"Saved {fullPath}");
     }
 }

@@ -1,5 +1,5 @@
-proj csproj:HelloWorld.Minilang
+setup csproj:HelloWorld.Minilang
     console
 
-program csprog
+run csprog
     print 'Hello_World!

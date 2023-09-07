@@ -11,7 +11,7 @@ public record Declaration(
     public static implicit operator Declaration(FunctionDeclaration functionDeclaration) => new(Function: functionDeclaration);
     public static implicit operator Declaration(ClassDeclaration classDeclaration) => new(Class: classDeclaration);
 
-    public FunctionDeclaration RequiredFunction => Function ?? throw new("Unable to use the declaration as function declaration");
+    public FunctionDeclaration RequiredFunction => Function ?? throw new($"Unable to use {this.TheOne} as function declaration");
 
     public static Declaration[] Read(IEnumerable<FileBlock> blocks)
     {
@@ -26,6 +26,16 @@ public record Declaration(
         throw new($"Unable to parse declaration of '{block}'");
     }
 
+    public bool TryGetClass(out ClassDeclaration classDeclaration) {
+        classDeclaration = Class!;
+        return Class != null;
+    }
+
+    public bool TryGetFunction(out FunctionDeclaration functionDeclaration) {
+        functionDeclaration = Function!;
+        return Function != null;
+    }
+
     public IDeclaration TheOne => (IDeclaration?)Function ?? (IDeclaration?)Class ?? throw new Exception("The declaration is neither Function or Class declaration");
     public Attributes Attributes => TheOne.Attributes;
 
@@ -35,5 +45,39 @@ public record Declaration(
     {
         if (Function != null) onFunction(Function);
         if (Class != null) onClass(Class);
+    }
+
+    public override string ToString()
+    {
+        return TheOne.ToString()!;
+    }
+}
+
+public static class DeclarationExtensions
+{
+    public static (FunctionDeclaration[] Functions, ClassDeclaration[] Classes) Fork(this Declaration[] declarations)
+    {
+        var functions = new List<FunctionDeclaration>();
+        var classes = new List<ClassDeclaration>();
+
+        foreach (var declaration in declarations)
+        {
+            declaration.On(
+                onFunction: functions.Add,
+                onClass: classes.Add
+            );
+        }
+
+        return (functions.ToArray(), classes.ToArray());
+    }
+
+    public static Declaration[] Printed(this Declaration[] declarations)
+    {
+        var (functionDeclarations, classDeclarations) = declarations.Fork();
+
+        functionDeclarations.Printed();
+        classDeclarations.Printed();
+
+        return declarations;
     }
 }

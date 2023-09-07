@@ -28,8 +28,8 @@ public record CodeBuilder(string Separator = "")
         return Build();
     }
 
-    public CodeBuilder Sub() {
-        var sub = new CodeBuilder();
+    public CodeBuilder Sub(string separator = "") {
+        var sub = new CodeBuilder(separator);
         parts.Add(sub);
         return sub;
     }

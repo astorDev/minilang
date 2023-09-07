@@ -3,27 +3,43 @@ public record ReturningCall(
     FunctionCall? FunctionCall = null, 
     LocalVariableCall? LocalVariableCall = null,
     Lambda? Lambda = null,
+    BoolLiteral? BoolLiteral = null,
+    ArgumentCall? ArgumentCall = null,
     MaybeHeadlessBlock? Unparsed = null)
 {
     public static ReturningCall Parse(MaybeHeadlessBlock block, FunctionContext context)
     {
         if (block.TryBeHeaded(out var headed))
         {
-            if (Lambda.TryParse(headed, out var lambda)) return lambda;
-            if (StringLiteral.TryParse(headed, context, out var stringLiteral)) return stringLiteral;
-            if (LocalVariableCall.TryParse(headed, context, out var localVariableCall)) return localVariableCall;
+            var headedResult = ParsedHeadedOrNull(headed, context);
+            if (headedResult != null) return headedResult;
         }
 
-        if (FunctionCall.TryParse(block, context, out var functionCall)) return functionCall;
+        if (FunctionCall.TryParse(block, context, out var functionCall)) return new (FunctionCall: functionCall);
 
         return new ReturningCall(Unparsed: block);
     }
 
-    public static implicit operator ReturningCall(Lambda lambda) => new ReturningCall(Lambda: lambda);
-    public static implicit operator ReturningCall(LocalVariableCall localVariableCall) => new ReturningCall(LocalVariableCall: localVariableCall);
-    public static implicit operator ReturningCall(StringLiteral stringLiteral) => new ReturningCall(StringLiteral : stringLiteral);
-    public static implicit operator ReturningCall(FunctionCall functionCall) => new ReturningCall(FunctionCall : functionCall);
-    public static implicit operator ReturningCall(Block unparsed) => new ReturningCall(Unparsed : unparsed);
+    public static ReturningCall? ParsedHeadedOrNull(Block block, FunctionContext context)
+    {
+        if (ArgumentCall.TryParseForReturningCall(block, context, out var argumentCall)) return new (ArgumentCall: argumentCall);
+        if (BoolLiteral.TryParse(block, out var boolLiteral)) return new (BoolLiteral: boolLiteral);
+        if (StringLiteral.TryParse(block, context, out var stringLiteral)) return new (StringLiteral: stringLiteral);
+        if (Lambda.TryParse(block, out var lambda)) return new (Lambda: lambda);
+        if (LocalVariableCall.TryParse(block, context, out var localVariableCall)) return new (LocalVariableCall: localVariableCall);
+
+        return null;
+    }
+
+    public object TheOne
+     =>
+        (object?)StringLiteral ??
+        (object?)FunctionCall ??
+        (object?)LocalVariableCall ??
+        (object?)Lambda ??
+        (object?)BoolLiteral ??
+        (object?)ArgumentCall ??
+        Unparsed!;
 
     public override string ToString()
     {
@@ -34,13 +50,17 @@ public record ReturningCall(
         Action<StringLiteral> stringLiteral,
         Action<FunctionCall> functionCall,
         Action<LocalVariableCall> localVariableCall,
-        Action<Lambda> lambda
+        Action<Lambda> lambda,
+        Action<BoolLiteral> boolLiteral,
+        Action<ArgumentCall> argumentCall
     )
     {
         if (StringLiteral != null) stringLiteral(StringLiteral);
         if (FunctionCall != null) functionCall(FunctionCall);
         if (LocalVariableCall != null) localVariableCall(LocalVariableCall);
         if (Lambda != null) lambda(Lambda);
+        if (BoolLiteral != null) boolLiteral(BoolLiteral);
+        if (ArgumentCall != null) argumentCall(ArgumentCall);
     }
 
     public StringLiteral RequiredStringLiteral => StringLiteral ?? throw new Exception($"Returning call is not StringLiteral, but '{TheOne.GetType()}'");
@@ -48,12 +68,6 @@ public record ReturningCall(
     public LocalVariableCall AsLocalVariableCall => LocalVariableCall ?? throw new Exception($"Returning call is not {nameof(LocalVariableCall)}, but '{TheOne.GetType()}'");
     public Lambda AsLambda => Lambda ?? throw new Exception($"Returning call is not {nameof(Lambda)}, but '{TheOne.GetType()}'");
 
-    public object TheOne
-     =>
-        (object?)StringLiteral ??
-        (object?)FunctionCall ??
-        (object?)LocalVariableCall ??
-        (object?)Lambda ??
-        Unparsed!;
+
 }
 
