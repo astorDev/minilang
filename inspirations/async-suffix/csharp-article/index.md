@@ -6,7 +6,7 @@ In 2012, C# received the `async`/`await` keywords and a new way of doing asynchr
 
 Still, I propose to stop using the suffix. Of course, I'm not the first one to do that. Developers and even companies have already made the move and outlined their reasoning (see NServiceBus "No Async Suffix"). This article lays out all the arguments I've gathered out there for ditching the suffix.
 
-## Hungarian Notation a.k.a. It Is Pure Noise.
+## 1. Hungarian Notation a.k.a. It Is Pure Noise.
 
 Hungarian notation, introduced by Charles Simonyi at Microsoft in the 1970s, is a naming convention where variable names include type information (e.g., `strName` for a string, `bIsReady` for a boolean). It became widespread in C, C++ throughout the 1980s and 1990s, helping developers manage type information in weakly-typed environments. 
 
@@ -22,15 +22,25 @@ In essence, the `Async` suffix is an example of Hungarian notation (or reverse H
 
 To summarize, the `Async` suffix, like other examples of Hungarian Notation, adds noise to the code base instead of relying on an IDE and the compiler. But if it's truly that useless, why are so many proponents of it, and why was it used by Microsoft in the first place? Let's discuss it in the next section.
 
-## Async Is The New Norm.
+## 2. Async Is The New Norm
 
-> What if I have a sync version of the same method?
+When `async` was introduced asynchronous methods weren't appearing only in new libraries. Quite the opposite, they were added to existing the CLR in a non-breaking fashion, representing `async` versions of existing methods. Since the methods were on the same types and accepted the same parameters, the only thing that could stand out was their names (and the return types of course, but this is something not allowing method overloading). 
 
-> We don't need to differentiate methods anymore.
+The solution was quite simple and even elegant - add the `Async` suffix. Nowadays, most APIs are async by default. For a non-library, it is hard to find a reason to have the sync suffix, to be honest.
+
+> But what do you do when you **do** have both versions?
+
+When an online discussion happens, proponents of async removal mostly suggest [downgrading back to the async suffix](https://www.reddit.com/r/dotnet/comments/10zpxst/comment/j84l6am/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button). I have a different proposal, which may appear a little radical: 
+
+> Use the `Sync` suffix. 
+
+The reason is simple: It should require less effort to do things the right way. That's it: allow using the sync version, but force to make it very explicit.
+
+## A Note About Warnings
 
 > You will get a warning anyway.
 
-## No Other Language Does This!
+## 3. No Other Language Does This!
 
 > Even Java, notorious for its verbosity, doesn't use the suffix.
 
