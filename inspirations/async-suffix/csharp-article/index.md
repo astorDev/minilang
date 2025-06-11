@@ -36,10 +36,6 @@ When an online discussion happens, proponents of async removal mostly suggest [d
 
 The reason is simple: It should require less effort to do things the right way. That's it: allow other developers to use the sync version, but force them to make it explicit.
 
-## A Note About Warnings
-
-> You will get a warning anyway.
-
 ## 3. No Other Language Does This!
 
 > Even Java, notorious for its verbosity, doesn't use the suffix.
