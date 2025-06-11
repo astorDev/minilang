@@ -24,7 +24,7 @@ To summarize, the `Async` suffix, like other examples of Hungarian Notation, add
 
 ## 2. Async Is The New Norm
 
-When `async` was introduced asynchronous methods weren't appearing only in new libraries. Quite the opposite, they were added to existing the CLR in a non-breaking fashion, representing `async` versions of existing methods. Since the methods were on the same types and accepted the same parameters, the only thing that could stand out was their names (and the return types of course, but this is something not allowing method overloading). 
+When `async` was introduced, asynchronous methods weren't appearing only in new libraries. Quite the opposite, they were added to the existing CLR in a non-breaking fashion, representing `async` versions of existing methods. Since the methods were of the same types and accepted the same parameters, the only thing that could stand out was their names (and the return types, of course, but this is something that does not allow method overloading). 
 
 The solution was quite simple and even elegant - add the `Async` suffix. Nowadays, most APIs are async by default. For a non-library, it is hard to find a reason to have the sync suffix, to be honest.
 
@@ -34,7 +34,7 @@ When an online discussion happens, proponents of async removal mostly suggest [d
 
 > Use the `Sync` suffix. 
 
-The reason is simple: It should require less effort to do things the right way. That's it: allow using the sync version, but force to make it very explicit.
+The reason is simple: It should require less effort to do things the right way. That's it: allow other developers to use the sync version, but force them to make it explicit.
 
 ## A Note About Warnings
 
