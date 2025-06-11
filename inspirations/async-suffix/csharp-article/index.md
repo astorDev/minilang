@@ -8,7 +8,7 @@ Still, I propose to stop using the suffix. Of course, I'm not the first one to d
 
 ## Hungarian Notation a.k.a. It Is Pure Noise.
 
-Hungarian notation, introduced by Charles Simonyi at Microsoft in the 1970s, is a naming convention where variable names include type information (e.g. `strName` for a string, `bIsReady` for boolean). It became widespread in C, C++ throughout the 1980s and 1990s, helping developers manage type information in weakly-typed environments. 
+Hungarian notation, introduced by Charles Simonyi at Microsoft in the 1970s, is a naming convention where variable names include type information (e.g., `strName` for a string, `bIsReady` for a boolean). It became widespread in C, C++ throughout the 1980s and 1990s, helping developers manage type information in weakly-typed environments. 
 
 Sometimes, we can still see relics of the notation like `tbl_TableName` in SQL tables, `m_count` for member (private) variables, or `lstItems` for lists. However, with IDEs getting better, the notation has become increasingly redundant. Following the principle of "Don't do something that doesn't bring any value," the overwhelming majority of programming language guidelines discourage the use of Hungarian Notation nowadays.
 
@@ -20,7 +20,7 @@ In essence, the `Async` suffix is an example of Hungarian notation (or reverse H
 
 > There's a notable exception: the `I` prefix in interfaces, which even NServiceBus uses. Perhaps that's a topic for another discussion.
 
-To summarize, `Async` suffix, like other examples of Hungarian Notation, adds noise to the code base, instead of relying on an IDE and the compiler. But if it's truly that useless, why are so many proponents of it and why was it used by Microsoft in the first place? Let's discuss it in the next section.
+To summarize, the `Async` suffix, like other examples of Hungarian Notation, adds noise to the code base instead of relying on an IDE and the compiler. But if it's truly that useless, why are so many proponents of it, and why was it used by Microsoft in the first place? Let's discuss it in the next section.
 
 ## Async Is The New Norm.
 
