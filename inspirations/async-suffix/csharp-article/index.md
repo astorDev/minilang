@@ -60,7 +60,7 @@ final json = const JsonEncoder.withIndent('  ')
 print(json);
 ```
 
-`Rust`, which tries to have pretty explicit syntax didn't adopt the suffix either:
+`Rust`, which tries to have pretty explicit syntax, didn't adopt the suffix either:
 
 ```rust
 let res = reqwest::get("https://raw.githubusercontent.com/astorDev/minilang/refs/heads/main/hello.json")
@@ -71,7 +71,7 @@ let res = reqwest::get("https://raw.githubusercontent.com/astorDev/minilang/refs
 println!("{}", serde_json::to_string_pretty(&res)?);
 ```
 
-And only in `C#` you will see the suffix.
+And only in `C#` will you see the suffix.
 
 ```csharp
 var client = new HttpClient();
