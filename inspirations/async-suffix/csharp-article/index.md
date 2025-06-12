@@ -38,48 +38,54 @@ The reason is simple: It should require less effort to do things the right way. 
 
 ## 3. Other Languages Don't Adopt This!
 
-After it was battle-tested by C#, other languages also adopted the `async`/`await` pattern. Yet none of them adopted the `Async` suffix. 
+After it was battle-tested by C#, other languages also adopted the `async`/`await` pattern. Yet none of them adopted the `Async` suffix. Let's see how we can GET a JSON response from an HTTP request in other adopters.
 
-`JavaScript`:
+Here's how it is done in `JavaScript`:
 
 ```js
-const res = await fetch("https://github.com/astorDev");
+const res = await fetch("https://raw.githubusercontent.com/astorDev/minilang/refs/heads/main/hello.json");
 console.log(await res.json());
 ```
 
-`Python`:
-
-```py
-async with aiohttp.ClientSession() as session:
-    async with session.get("https://api.github.com/users/astorDev") as resp:
-        print(await resp.json())
-```
-
-`Dart`:
+In Flutter's programming language, called `Dart`, you will not see the `Async` suffix:
 
 ```js
-final res = await http.get(Uri.parse('https://api.github.com/users/astorDev'));
-print(jsonDecode(res.body));
+final res = await http.get(Uri.parse(
+  'https://raw.githubusercontent.com/astorDev/minilang/refs/heads/main/hello.json'
+));
+
+final json = const JsonEncoder.withIndent('  ')
+  .convert(jsonDecode(res.body));
+
+print(json);
 ```
 
-`Rust`:
+`Rust`, which tries to have pretty explicit syntax, didn't adopt the suffix either:
 
 ```rust
-let res = reqwest::get("https://api.github.com/users/astorDev")
-        .await?
-        .json::<Value>()
-        .await?;
+let res = reqwest::get("https://raw.githubusercontent.com/astorDev/minilang/refs/heads/main/hello.json")
+    .await?
+    .json::<serde_json::Value>()
+    .await?;
 
-println!("{res:#?}");
+println!("{}", serde_json::to_string_pretty(&res)?);
 ```
 
-Yes, you've read it right. There's no other language that adopted the Async suffix convention on any noticable scale. 
+And only in `C#` will you see the suffix.
 
-> Even Java, notorious for its verbosity, doesn't use the suffix.
+```csharp
+var client = new HttpClient();
 
-```rust
-reqwest::get("https://astordev.github.io/").await?;
+var response = await client.GetFromJsonAsync<JsonObject>(
+    requestUri: "https://raw.githubusercontent.com/astorDev/minilang/refs/heads/main/hello.json"
+);
+
+Console.WriteLine(response!.ToJsonString(new () { WriteIndented = true }));
 ```
+
+So, none of the competitors decided to use the `Async` suffix. I guess that says something. With C# striving for more adoption and making the language and platform more minimalistic with top-level statements, Minimal APIs, and many more recent features, it's odd to see the .NET team promoting the `Async` suffix so desperately.
+
+I hope the article wasn't too long. Anyway, let's wrap it up with a quick recap and call it a day!
 
 ## TL;DR
 

@@ -1,8 +1,9 @@
 using System.Text.Json.Nodes;
 
 var client = new HttpClient();
-client.DefaultRequestHeaders.UserAgent.ParseAdd("request");
 
-var response = await client.GetFromJsonAsync<JsonObject>("https://api.github.com/users/astorDev");
+var response = await client.GetFromJsonAsync<JsonObject>(
+    requestUri: "https://raw.githubusercontent.com/astorDev/minilang/refs/heads/main/hello.json"
+);
 
 Console.WriteLine(response!.ToJsonString(new () { WriteIndented = true }));
