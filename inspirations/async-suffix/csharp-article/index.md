@@ -2,6 +2,8 @@
 
 > 3 Arguments Against Using the Async Suffix in Modern .NET Apps!
 
+![It Is Time To Move On...](thumb.png)
+
 In 2012, C# received the `async`/`await` keywords and a new way of doing asynchronous programming we still use and love. Along with it came the `Async` suffix that also leaks into our codebases to this day. With the suffix, a programmer could know straight away that a certain method is async and use the syntactic sugar accordingly. Nowadays, the suffix is something very comfy and familiar to every C# developer, and it has even lurked into Microsoft's naming guidelines.
 
 Still, I propose to stop using the suffix. Of course, I'm not the first one to do that. Developers and even companies have already made the move and outlined their reasoning (see NServiceBus "No Async Suffix"). This article lays out all the arguments I've gathered out there for ditching the suffix.
