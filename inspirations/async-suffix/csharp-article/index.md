@@ -36,9 +36,50 @@ When an online discussion happens, proponents of async removal mostly suggest [d
 
 The reason is simple: It should require less effort to do things the right way. That's it: allow other developers to use the sync version, but force them to make it explicit.
 
-## 3. No Other Language Does This!
+## 3. Other Languages Don't Adopt This!
+
+After it was battle-tested by C#, other languages also adopted the `async`/`await` pattern. Yet none of them adopted the `Async` suffix. 
+
+`JavaScript`:
+
+```js
+const res = await fetch("https://github.com/astorDev");
+console.log(await res.json());
+```
+
+`Python`:
+
+```py
+async with aiohttp.ClientSession() as session:
+    async with session.get("https://api.github.com/users/astorDev") as resp:
+        print(await resp.json())
+```
+
+`Dart`:
+
+```js
+final res = await http.get(Uri.parse('https://api.github.com/users/astorDev'));
+print(jsonDecode(res.body));
+```
+
+`Rust`:
+
+```rust
+let res = reqwest::get("https://api.github.com/users/astorDev")
+        .await?
+        .json::<Value>()
+        .await?;
+
+println!("{res:#?}");
+```
+
+Yes, you've read it right. There's no other language that adopted the Async suffix convention on any noticable scale. 
 
 > Even Java, notorious for its verbosity, doesn't use the suffix.
+
+```rust
+reqwest::get("https://astordev.github.io/").await?;
+```
 
 ## TL;DR
 
